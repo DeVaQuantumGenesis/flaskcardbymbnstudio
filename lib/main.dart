@@ -2,13 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'screens/home_screen.dart';
+import 'models/deck_adapter.dart';
+import 'models/card_adapter.dart';
+import 'models/deck.dart';
+import 'models/card_model.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Hive.initFlutter();
-  // We'll use simple Map storage in boxes (no TypeAdapters) for MVP.
-  await Hive.openBox('decks');
-  await Hive.openBox('cards');
+  // Register adapters for typed storage
+  Hive.registerAdapter(DeckAdapter());
+  Hive.registerAdapter(CardModelAdapter());
+  // Open typed boxes
+  await Hive.openBox<Deck>('decks');
+  await Hive.openBox<CardModel>('cards');
 
   runApp(const ProviderScope(child: FlashcardApp()));
 }

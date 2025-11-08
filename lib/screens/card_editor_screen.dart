@@ -55,6 +55,7 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
                 final back = _backController.text.trim();
                 if (front.isEmpty || back.isEmpty) return;
                 final notifier = ref.read(cardsNotifierProvider(widget.deckId).notifier);
+                final navigator = Navigator.of(context);
                 if (isEditing) {
                   final updated = widget.card!.copyWith(front: front, back: back);
                   await notifier.update(updated);
@@ -62,7 +63,7 @@ class _CardEditorScreenState extends ConsumerState<CardEditorScreen> {
                   await notifier.add(front, back);
                 }
                 if (!mounted) return;
-                Navigator.of(context).pop();
+                navigator.pop();
               },
               child: Text(isEditing ? 'Save' : 'Create'),
             ),

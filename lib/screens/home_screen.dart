@@ -60,8 +60,9 @@ class HomeScreen extends ConsumerWidget {
             onPressed: () async {
               final title = controller.text.trim();
               if (title.isNotEmpty) {
-                await ref.read(decksNotifierProvider.notifier).add(title);
+                // Close dialog first to avoid using BuildContext across async gap
                 Navigator.of(ctx).pop();
+                await ref.read(decksNotifierProvider.notifier).add(title);
               }
             },
             child: const Text('Create'),
