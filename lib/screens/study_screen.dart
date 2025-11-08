@@ -15,6 +15,7 @@ class StudyScreen extends ConsumerStatefulWidget {
 class _StudyScreenState extends ConsumerState<StudyScreen> {
   int index = 0;
   bool showBack = false;
+  bool animating = false;
 
   @override
   Widget build(BuildContext context) {
@@ -35,17 +36,48 @@ class _StudyScreenState extends ConsumerState<StudyScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Expanded(
-              child: Card(
-                elevation: 4,
-                child: InkWell(
-                  onTap: () => setState(() => showBack = !showBack),
-                  child: Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Text(
-                        showBack ? current.back : current.front,
-                        style: Theme.of(context).textTheme.headlineSmall,
-                        textAlign: TextAlign.center,
+              child: GestureDetector(
+                onTap: () async {
+                  setState(() => animating = true);
+                  await Future.delayed(const Duration(milliseconds: 150));
+                  setState(() {
+                    showBack = !showBack;
+                    animating = false;
+                  });
+                },
+                child: Center(
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 350),
+                    transitionBuilder: (child, animation) {
+                      final rotate = Tween(begin: 0.0, end: 1.0).animate(animation);
+                      return AnimatedBuilder(
+                        animation: rotate,
+                        child: child,
+                        builder: (context, child) {
+                          final value = rotate.value;
+                          final angle = value * 3.14159;
+                          return Transform(
+                            transform: Matrix4.rotationY(angle),
+                            alignment: Alignment.center,
+                            child: child,
+                          );
+                        },
+                      );
+                    },
+                    child: Card(
+                      key: ValueKey(showBack),
+                      elevation: 6,
+                      child: Container(
+                        constraints: const BoxConstraints(minHeight: 200),
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(20),
+                        child: Center(
+                          child: Text(
+                            showBack ? current.back : current.front,
+                            style: Theme.of(context).textTheme.headlineSmall,
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
                       ),
                     ),
                   ),
@@ -56,12 +88,12 @@ class _StudyScreenState extends ConsumerState<StudyScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                ElevatedButton.icon(
+                OutlinedButton.icon(
                   onPressed: () => _mark(false, cards.length),
-                  icon: const Icon(Icons.close),
+                  icon: const Icon(Icons.refresh),
                   label: const Text('Again'),
                 ),
-                ElevatedButton.icon(
+                FilledButton.icon(
                   onPressed: () => _mark(true, cards.length),
                   icon: const Icon(Icons.check),
                   label: const Text('Known'),
@@ -69,7 +101,19 @@ class _StudyScreenState extends ConsumerState<StudyScreen> {
               ],
             ),
             const SizedBox(height: 12),
-            Text('${index + 1} / ${cards.length}'),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('${index + 1} / ${cards.length}'),
+                  SizedBox(
+                    width: 120,
+                    child: LinearProgressIndicator(value: (index + 1) / cards.length),
+                  ),
+                ],
+              ),
+            ),
             const SizedBox(height: 24),
           ],
         ),
