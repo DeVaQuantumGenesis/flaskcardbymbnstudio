@@ -56,10 +56,25 @@ class _StudyScreenState extends ConsumerState<StudyScreen> {
                         builder: (context, child) {
                           final value = rotate.value;
                           final angle = value * 3.14159;
+
+                          // When the rotating angle passes 90 degrees (pi/2),
+                          // the child would appear mirrored. To avoid mirrored
+                          // text, flip the child itself by 180 degrees when
+                          // the rotation progress is beyond halfway. This
+                          // effectively cancels the mirrored look for text.
+                          Widget displayChild = child!;
+                          if (value > 0.5) {
+                            displayChild = Transform(
+                              transform: Matrix4.rotationY(3.14159),
+                              alignment: Alignment.center,
+                              child: child,
+                            );
+                          }
+
                           return Transform(
                             transform: Matrix4.rotationY(angle),
                             alignment: Alignment.center,
-                            child: child,
+                            child: displayChild,
                           );
                         },
                       );
